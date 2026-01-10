@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Ask the World Anything</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="https://cdn.jsdelivr.net/gh/tableau/extensions-api/lib/tableau.extensions.1.latest.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      padding: 24px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 16px;
+      padding: 32px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+
+    h1 {
+      font-size: 32px;
+      color: #1a202c;
+      margin-bottom: 8px;
+      text-align: center;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #718096;
+      margin-bottom: 32px;
+      font-size: 14px;
+    }
+
+    .input-section {
+      margin-bottom: 24px;
+    }
+
+    .examples-section {
+      margin-top: 16px;
+    }
+
+    .examples-label {
+      font-size: 13px;
+      color: #718096;
+      margin-bottom: 12px;
+    }
+
+    .example-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .example-btn {
+      background: #f7fafc;
+      color: #2d3748;
+      border: 1px solid #e2e8f0;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 400;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: left;
+      flex: 1 1 auto;
+      min-width: 200px;
+    }
+
+    .example-btn:hover {
+      background: #edf2f7;
+      border-color: #cbd5e0;
+      transform: translateY(-1px);
+    }
+
+    label {
+      display: block;
+      font-weight: 600;
+      color: #2d3748;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+
+    .question-input {
+      width: 100%;
+      padding: 16px;
+      border: 2px solid #e2e8f0;
+      border-radius: 8px;
+      font-size: 16px;
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+
+    .question-input:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .country-selector {
+      margin-bottom: 24px;
+    }
+
+    .radio-group {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .radio-label {
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      font-weight: 500;
+      color: #2d3748;
+    }
+
+    .radio-label input {
+      margin-right: 8px;
+      cursor: pointer;
+    }
+
+    .multi-select-container {
+      position: relative;
+      margin-top: 12px;
+    }
+
+    .selected-pills {
+      min-height: 42px;
+      border: 2px solid #cbd5e0;
+      border-radius: 8px;
+      padding: 6px;
+      background: white;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+      cursor: pointer;
+    }
+
+    .country-pill {
+      background: #3182ce;
+      color: white;
+      padding: 4px 8px;
+      border-radius: 16px;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .pill-remove {
+      background: none;
+      border: none;
+      color: white;
+      cursor: pointer;
+      font-size: 16px;
+      padding: 0;
+      width: 16px;
+      height: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+    }
+
+    .dropdown-toggle {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 4px 8px;
+      color: #4a5568;
+      font-size: 14px;
+      margin-left: auto;
+    }
+
+    .dropdown-arrow {
+      transition: transform 0.2s;
+    }
+
+    .dropdown-arrow.open {
+      transform: rotate(180deg);
+    }
+
+    .dropdown-menu {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      margin-top: 4px;
+      background: white;
+      border: 1px solid #cbd5e0;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      max-height: 320px;
+      overflow-y: auto;
+      z-index: 1000;
+    }
+
+    .filter-input {
+      width: calc(100% - 16px);
+      padding: 8px;
+      margin: 8px;
+      border: 1px solid #e2e8f0;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+
+    .dropdown-item {
+      padding: 8px 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .dropdown-item:hover {
+      background: #f7fafc;
+    }
+
+    .dropdown-item input[type="checkbox"] {
+      cursor: pointer;
+      width: 16px;
+      height: 16px;
+    }
+
+    .dropdown-item label {
+      cursor: pointer;
+      margin: 0;
+      flex: 1;
+      font-weight: 400;
+    }
+
+    #selectAllItem {
+      border-bottom: 1px solid #e2e8f0;
+      font-weight: 600;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    button {
+      flex: 1;
+      padding: 16px 24px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn-secondary {
+      background: #edf2f7;
+      color: #2d3748;
+    }
+
+    .btn-secondary:hover {
+      background: #e2e8f0;
+    }
+
+    .status-bar {
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      font-size: 14px;
+    }
+
+    .status-bar.info {
+      background: #bee3f8;
+      color: #2c5282;
+    }
+
+    .status-bar.success {
+      background: #c6f6d5;
+      color: #22543d;
+    }
+
+    .status-bar.error {
+      background: #fed7d7;
+      color: #742a2a;
+    }
+
+    .status-bar.warning {
+      background: #fefcbf;
+      color: #744210;
+    }
+
+    .refresh-hint {
+      background: #e2e8f0;
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin-top: 16px;
+      font-size: 13px;
+      color: #4a5568;
+      display: none;
+    }
+
+    .refresh-hint.show {
+      display: block;
+    }
+
+    .refresh-hint strong {
+      color: #2d3748;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🌍 Ask the World Anything</h1>
+    <p class="subtitle">Explore global perspectives on any question using AI-powered analysis</p>
+
+    <div id="statusBar" class="status-bar info" style="display: none;"></div>
+
+    <div class="input-section">
+      <label for="questionInput">What does the world think about...</label>
+      <input 
+        type="text" 
+        id="questionInput" 
+        class="question-input"
+        placeholder="e.g., Social media makes people fool"
+      />
+      
+      <div class="examples-section">
+        <p class="examples-label">Try one of these examples:</p>
+        <div class="example-buttons">
+          <button class="example-btn" data-question="Climate change is primarily caused by human activities">
+            Climate change is primarily caused by human activities
+          </button>
+          <button class="example-btn" data-question="Social media has a negative impact on mental health">
+            Social media has a negative impact on mental health
+          </button>
+          <button class="example-btn" data-question="Vaccines are essential for public health">
+            Vaccines are essential for public health
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="country-selector">
+      <label>Countries to Analyze</label>
+      <div class="radio-group">
+        <label class="radio-label">
+          <input type="radio" name="countryMode" value="all" checked>
+          All Countries
+        </label>
+        <label class="radio-label">
+          <input type="radio" name="countryMode" value="selected">
+          Selected Countries
+        </label>
+      </div>
+
+      <div id="multiSelectContainer" class="multi-select-container" style="display: none;">
+        <div class="selected-pills" id="selectedPills">
+          <button class="dropdown-toggle" id="dropdownToggle">
+            <span class="dropdown-arrow">▼</span>
+          </button>
+        </div>
+        
+        <div class="dropdown-menu" id="dropdownMenu" style="display: none;">
+          <input type="text" id="countrySearch" class="filter-input" placeholder="Filter" />
+          <div class="dropdown-item" id="selectAllItem">
+            <input type="checkbox" id="selectAllCheckbox">
+            <label for="selectAllCheckbox">Select All</label>
+          </div>
+          <div id="countryCheckboxes"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="button-group">
+      <button id="analyzeBtn" class="btn-primary">
+        <span class="icon">🔍</span> Analyze
+      </button>
+      <button id="voiceBtn" class="btn-secondary">
+        <span class="icon">🎤</span> Voice
+      </button>
+    </div>
+
+    <div id="refreshHint" class="refresh-hint">
+      <strong>⚠️ Automatic refresh not configured</strong><br>
+      Please click the <strong>refresh button (🔄)</strong> in the Tableau toolbar above to see the new results.<br>
+      <small>To enable automatic refresh, configure Tableau REST API in .env</small>
+    </div>
+  </div>
+
+  <script>
+    let countriesData = [];
+    let selectedCountriesSet = new Set();
+    let tableauInitialized = false;
+
+    // Show status message
+    function showStatus(message, type = 'info') {
+      const statusBar = document.getElementById('statusBar');
+      statusBar.textContent = message;
+      statusBar.className = 'status-bar ' + type;
+      statusBar.style.display = 'block';
+    }
+
+    function hideStatus() {
+      document.getElementById('statusBar').style.display = 'none';
+    }
+
+    function showRefreshHint() {
+      document.getElementById('refreshHint').classList.add('show');
+    }
+
+    function hideRefreshHint() {
+      document.getElementById('refreshHint').classList.remove('show');
+    }
+
+    // Initialize Tableau
+    async function initializeTableau() {
+      try {
+        await tableau.extensions.initializeAsync();
+        tableauInitialized = true;
+        console.log('✅ Tableau Extensions API initialized');
+        return true;
+      } catch (err) {
+        console.log('ℹ️ Running outside Tableau:', err.message);
+        return false;
+      }
+    }
+
+    // FIXED: Try to refresh Tableau data sources (correct API usage)
+    async function tryRefreshTableau() {
+      if (!tableauInitialized) {
+        console.log('ℹ️  Not running in Tableau');
+        return false;
+      }
+      
+      try {
+        const dashboard = tableau.extensions.dashboardContent?.dashboard;
+        if (!dashboard) {
+          console.log('ℹ️  Dashboard not available');
+          return false;
+        }
+        
+        // IMPORTANT: Wait 2 seconds for MySQL to propagate data
+        console.log('⏳ Waiting 2 seconds for database to update...');
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        
+        // Get data sources from ALL worksheets (correct API usage)
+        const worksheets = dashboard.worksheets;
+        console.log('📊 Found', worksheets.length, 'worksheet(s)');
+        
+        let refreshed = false;
+        let dataSourcesFound = new Set();
+        
+        // Iterate through worksheets to find data sources
+        for (const worksheet of worksheets) {
+          try {
+            const dataSources = await worksheet.getDataSourcesAsync();
+            
+            for (const ds of dataSources) {
+              // Avoid refreshing same data source multiple times
+              if (!dataSourcesFound.has(ds.id)) {
+                dataSourcesFound.add(ds.id);
+                
+                try {
+                  console.log('🔄 Refreshing:', ds.name);
+                  await ds.refreshAsync();
+                  console.log('✅ Refreshed successfully:', ds.name);
+                  refreshed = true;
+                } catch (e) {
+                  console.error('❌ Refresh failed:', ds.name, e.message);
+                }
+              }
+            }
+          } catch (e) {
+            console.log('⚠️  Could not get data sources from worksheet:', worksheet.name);
+          }
+        }
+        
+        if (refreshed) {
+          console.log('✅ Live connection refreshed - dashboard updated!');
+          return true;
+        } else {
+          console.warn('⚠️  No data sources could be refreshed');
+          return false;
+        }
+      } catch (error) {
+        console.error('❌ Refresh error:', error.message);
+        return false;
+      }
+    }
+
+    // Populate country dropdown
+    function populateDropdown(countries) {
+      const container = document.getElementById('countryCheckboxes');
+      if (!container) return;
+      
+      container.innerHTML = '';
+      
+      countries.forEach(country => {
+        const item = document.createElement('div');
+        item.className = 'dropdown-item country-item';
+        
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.id = `country-${country.code}`;
+        checkbox.value = country.code;
+        
+        const label = document.createElement('label');
+        label.htmlFor = `country-${country.code}`;
+        label.textContent = country.name;
+        
+        item.appendChild(checkbox);
+        item.appendChild(label);
+        
+        checkbox.addEventListener('change', () => {
+          if (checkbox.checked) {
+            selectedCountriesSet.add(country.code);
+            addPill(country.code, country.name);
+          } else {
+            selectedCountriesSet.delete(country.code);
+            removePill(country.code);
+          }
+          updateSelectAll();
+        });
+        
+        item.addEventListener('click', (e) => {
+          if (e.target !== checkbox) {
+            checkbox.checked = !checkbox.checked;
+            checkbox.dispatchEvent(new Event('change'));
+          }
+        });
+        
+        container.appendChild(item);
+      });
+      
+      console.log('✅ Loaded', countries.length, 'countries');
+    }
+
+    function addPill(code, name) {
+      const pillsContainer = document.getElementById('selectedPills');
+      const dropdownToggle = document.getElementById('dropdownToggle');
+      
+      if (document.querySelector(`.country-pill[data-code="${code}"]`)) return;
+      
+      const pill = document.createElement('div');
+      pill.className = 'country-pill';
+      pill.dataset.code = code;
+      pill.innerHTML = `<span>${name}</span><button class="pill-remove">×</button>`;
+      
+      pill.querySelector('.pill-remove').addEventListener('click', (e) => {
+        e.stopPropagation();
+        removePill(code);
+        const checkbox = document.getElementById(`country-${code}`);
+        if (checkbox) checkbox.checked = false;
+        selectedCountriesSet.delete(code);
+        updateSelectAll();
+      });
+      
+      pillsContainer.insertBefore(pill, dropdownToggle);
+    }
+
+    function removePill(code) {
+      const pill = document.querySelector(`.country-pill[data-code="${code}"]`);
+      if (pill) pill.remove();
+    }
+
+    function updateSelectAll() {
+      const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+      if (selectAllCheckbox && countriesData.length > 0) {
+        selectAllCheckbox.checked = selectedCountriesSet.size === countriesData.length;
+      }
+    }
+
+    window.getSelectedCountries = () => Array.from(selectedCountriesSet);
+
+    // IMPORTANT: Expose refresh function globally for voice agent window
+    window.tryRefreshTableau = tryRefreshTableau;
+
+    // CRITICAL FIX: Listen for voice agent messages
+    // Voice agent sends postMessage instead of calling function directly
+    // This ensures Tableau API runs in main window context, not popup
+    window.addEventListener('message', async (event) => {
+      console.log('========================================');
+      console.log('📨 MESSAGE RECEIVED FROM CHILD WINDOW');
+      console.log('   Event origin:', event.origin);
+      console.log('   Message type:', event.data?.type);
+      console.log('   Message data:', event.data);
+      console.log('========================================');
+
+      // Handle voice agent status updates
+      if (event.data?.type === 'VOICE_ANALYSIS_STATUS') {
+        console.log('📊 Voice agent status update:', event.data.status);
+
+        if (event.data.status === 'analyzing') {
+          // Show "Analyzing..." status in main page
+          showStatus('🤖 Analyzing question with AI... This may take 30-60 seconds.', 'info');
+          hideRefreshHint();
+          console.log('   Showing "analyzing" status in main page');
+        }
+      }
+
+      // Handle voice agent refresh trigger
+      else if (event.data?.type === 'TRIGGER_TABLEAU_REFRESH') {
+        console.log('✅ Voice agent triggered refresh!');
+        console.log('   Country count:', event.data.countryCount);
+        console.log('   Calling tryRefreshTableau() in MAIN window context...');
+
+        // Show status message
+        showStatus(`✅ Analysis complete! ${event.data.countryCount} countries analyzed. Dashboard will auto-refresh in ~5 seconds...`, 'success');
+        hideRefreshHint();
+
+        // Call refresh in THIS window's context (not popup context)
+        const refreshed = await tryRefreshTableau();
+
+        if (!refreshed) {
+          showRefreshHint();
+        }
+
+        console.log('========================================');
+        console.log('✅ VOICE AGENT REFRESH COMPLETE');
+        console.log('   Refreshed:', refreshed);
+        console.log('========================================');
+      }
+    });
+
+    // Setup event handlers
+    function setupEventHandlers() {
+      // Dropdown toggle
+      const dropdownToggle = document.getElementById('dropdownToggle');
+      const dropdownMenu = document.getElementById('dropdownMenu');
+      const multiSelectContainer = document.getElementById('multiSelectContainer');
+      
+      dropdownToggle?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isOpen = dropdownMenu.style.display === 'block';
+        dropdownMenu.style.display = isOpen ? 'none' : 'block';
+        dropdownToggle.querySelector('.dropdown-arrow')?.classList.toggle('open', !isOpen);
+      });
+      
+      document.addEventListener('click', (e) => {
+        if (!multiSelectContainer?.contains(e.target)) {
+          dropdownMenu.style.display = 'none';
+          dropdownToggle?.querySelector('.dropdown-arrow')?.classList.remove('open');
+        }
+      });
+      
+      // Filter
+      document.getElementById('countrySearch')?.addEventListener('input', (e) => {
+        const term = e.target.value.toLowerCase();
+        document.querySelectorAll('.country-item').forEach(item => {
+          const label = item.querySelector('label');
+          item.style.display = label.textContent.toLowerCase().includes(term) ? 'flex' : 'none';
+        });
+      });
+      
+      // Select All
+      const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+      document.getElementById('selectAllItem')?.addEventListener('click', (e) => {
+        if (e.target !== selectAllCheckbox) {
+          selectAllCheckbox.checked = !selectAllCheckbox.checked;
+          selectAllCheckbox.dispatchEvent(new Event('change'));
+        }
+      });
+      
+      selectAllCheckbox?.addEventListener('change', (e) => {
+        document.querySelectorAll('.country-item input[type="checkbox"]').forEach(cb => {
+          if (cb.checked !== e.target.checked) {
+            cb.checked = e.target.checked;
+            cb.dispatchEvent(new Event('change'));
+          }
+        });
+      });
+      
+      // Radio buttons
+      document.querySelectorAll('input[name="countryMode"]').forEach(radio => {
+        radio.addEventListener('change', (e) => {
+          multiSelectContainer.style.display = e.target.value === 'selected' ? 'block' : 'none';
+        });
+      });
+      
+      // Example buttons
+      document.querySelectorAll('.example-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.getElementById('questionInput').value = btn.getAttribute('data-question');
+        });
+      });
+      
+      // Voice button - UPDATED: Smaller window size!
+      document.getElementById('voiceBtn')?.addEventListener('click', () => {
+        window.open(window.location.origin + '/voice', 'voiceAgent', 'width=380,height=400,scrollbars=no,resizable=no');
+      });
+      
+      // Analyze button
+      document.getElementById('analyzeBtn')?.addEventListener('click', runAnalysis);
+    }
+
+    // Main analysis function
+    async function runAnalysis() {
+      const analyzeBtn = document.getElementById('analyzeBtn');
+      const question = document.getElementById('questionInput').value.trim();
+      
+      if (!question) {
+        showStatus('Please enter a question', 'error');
+        return;
+      }
+      
+      const countryMode = document.querySelector('input[name="countryMode"]:checked').value;
+      let countries = 'ALL';
+      
+      if (countryMode === 'selected') {
+        countries = window.getSelectedCountries();
+        if (countries.length === 0) {
+          showStatus('Please select at least one country', 'error');
+          return;
+        }
+      }
+      
+      console.log('📝 Analyzing:', question);
+      hideRefreshHint();
+      
+      analyzeBtn.disabled = true;
+      analyzeBtn.innerHTML = '<span class="icon">⏳</span> Analyzing... (30-60 sec)';
+      showStatus('🤖 Analyzing question with AI... This may take 30-60 seconds.', 'info');
+      
+      try {
+        const response = await fetch('/api/analyze', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ question, countries })
+        });
+        
+        const data = await response.json();
+        
+        if (data.ok && data.status === 'complete') {
+          console.log('✅ Analysis complete!', data.data.countries.length, 'countries');
+          
+          showStatus(`✅ Analysis complete! ${data.data.countries.length} countries analyzed. Dashboard will auto-refresh in ~5 seconds...`, 'success');
+          analyzeBtn.innerHTML = '<span class="icon">✅</span> Done!';
+          
+          // Try client-side refresh for Live connections
+          const refreshed = await tryRefreshTableau();
+          
+          if (!refreshed) {
+            showRefreshHint();
+          }
+          
+        } else {
+          throw new Error(data.error || 'Analysis failed');
+        }
+      } catch (error) {
+        console.error('❌ Analysis error:', error);
+        showStatus('❌ Error: ' + error.message, 'error');
+        analyzeBtn.innerHTML = '<span class="icon">❌</span> Error';
+      }
+      
+      setTimeout(() => {
+        analyzeBtn.disabled = false;
+        analyzeBtn.innerHTML = '<span class="icon">🔍</span> Analyze';
+      }, 3000);
+    }
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', async () => {
+      console.log('🚀 Initializing...');
+      
+      await initializeTableau();
+      
+      try {
+        const res = await fetch('/api/countries');
+        const data = await res.json();
+        if (data.ok) {
+          countriesData = data.countries;
+          populateDropdown(countriesData);
+        }
+      } catch (err) {
+        console.error('Failed to load countries:', err);
+      }
+      
+      setupEventHandlers();
+      console.log('✅ Ready!');
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,71 @@
+{
+  "type": "webhook",
+  "name": "analyze_question",
+  "description": "Analyzes global perspectives on any question or statement. Use this when the user asks to analyze something or wants to know what the world thinks about a topic.",
+  "disable_interruptions": false,
+  "force_pre_tool_speech": "auto",
+  "assignments": [],
+  "tool_call_sound": null,
+  "tool_call_sound_behavior": "auto",
+  "execution_mode": "immediate",
+  "api_schema": {
+    "url": "https://ask-the-world-anything-nine.vercel.app/api/voice-analyze",
+    "method": "POST",
+    "path_params_schema": [],
+    "query_params_schema": [],
+    "request_body_schema": {
+      "id": "body",
+      "type": "object",
+      "description": "Analysis request",
+      "properties": [
+        {
+          "id": "command_type",
+          "type": "string",
+          "value_type": "constant",
+          "description": "Command type - always 'analyze'",
+          "dynamic_variable": "",
+          "constant_value": "analyze",
+          "enum": null,
+          "is_system_provided": false,
+          "required": true
+        },
+        {
+          "id": "command_value",
+          "type": "string",
+          "value_type": "llm_prompt",
+          "description": "The complete question or statement to analyze (e.g., 'Social media makes people fool', 'Vaccines are essential for public health', 'Climate change is primarily caused by human activities'). Extract the full statement from user's speech.",
+          "dynamic_variable": "",
+          "constant_value": "",
+          "enum": null,
+          "is_system_provided": false,
+          "required": true
+        },
+        {
+          "id": "countries",
+          "type": "string",
+          "value_type": "llm_prompt",
+          "description": "Optional: Comma-separated list of country names to analyze. If user mentions specific countries (e.g., 'in United States and Canada', 'for China, India, Brazil'), extract those country names as a comma-separated string. If user doesn't mention specific countries or says 'all countries' or 'global', leave this empty or set to 'ALL'. Examples: 'United States,Canada,Mexico' or 'China,India,Japan' or 'ALL'.",
+          "dynamic_variable": "",
+          "constant_value": "",
+          "enum": null,
+          "is_system_provided": false,
+          "required": false
+        }
+      ],
+      "required": false,
+      "value_type": "llm_prompt"
+    },
+    "request_headers": [
+      {
+        "type": "value",
+        "name": "Content-Type",
+        "value": "application/json"
+      }
+    ],
+    "auth_connection": null
+  },
+  "response_timeout_secs": 60,
+  "dynamic_variables": {
+    "dynamic_variable_placeholders": {}
+  }
+}
