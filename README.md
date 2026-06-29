@@ -1,4 +1,7 @@
-# Ask the World Anything - Tableau cloud challenge
+# What the World Really Thinks
+
+> **H0 Hackathon submission** — *Hack the Zero Stack with Vercel v0 and AWS Databases.*
+> Front-end shipped on **Vercel**; back-end powered by **Amazon Aurora PostgreSQL (Serverless v2)** feeding a live Tableau dashboard.
 
 ## Have you ever talked to your Tableau dashboard?
 
@@ -27,7 +30,7 @@ My inspiration came from realizing that **truth isn't always universal**—it's 
 
 ## What it does
 
-**Ask the World Anything** is an AI-powered global perspectives analyzer that combines **Perplexity API**, **ElevenLabs Voice Agents**, and **Tableau** to create an interactive, voice-enabled exploration of worldwide opinions.
+**What the World Really Thinks** is an AI-powered global perspectives analyzer that combines **Perplexity API**, **ElevenLabs Voice Agents**, **Amazon Aurora PostgreSQL**, and **Tableau** to create an interactive, voice-enabled exploration of worldwide opinions.
 
 Here's how it works:
 
@@ -69,7 +72,7 @@ I built this as a **full-stack application** integrating cutting-edge AI, voice,
 
 ### Backend (Node.js/Express on Vercel)
 - **Perplexity API (Sonar)**: The core intelligence engine analyzing cultural perspectives across several countries
-- **MySQL Database**: Real-time data storage with instant propagation to Tableau
+- **Amazon Aurora PostgreSQL (Serverless v2)**: Cloud-native, auto-scaling data store with instant propagation to Tableau via a Live connection
 - **ElevenLabs Webhook Integration**: Voice agent calls backend API when user speaks
 - **Express.js API**: Handles voice requests, analysis orchestration, and status tracking
 
@@ -87,7 +90,7 @@ The **ElevenLabs Voice Agent** is configured with a custom webhook tool that:
 4. Calls `/api/voice-analyze` webhook with 60-second timeout
 5. Backend maps country names → country codes automatically
 6. Analysis runs synchronously (just like the analyze button)
-7. Results save to MySQL database
+7. Results save to Amazon Aurora PostgreSQL
 8. Voice agent auto-detects completion (polls every 2 seconds)
 9. Sends refresh message to main dashboard via `postMessage`
 10. Tableau Live connection refreshes automatically
@@ -104,7 +107,7 @@ Map country names to codes (US, CA, MX)
     ↓
 Perplexity analyzes 3-52 countries
     ↓
-Write to MySQL database
+Write to Amazon Aurora PostgreSQL
     ↓
 Update lastAnalysis status (analyzing → complete)
     ↓
@@ -146,7 +149,7 @@ The voice agent uses:
 
 ### Architecture Highlights
 - **Serverless deployment** on Vercel with 60-second function timeout
-- **MySQL Live connection** for instant Tableau refresh (no extract refresh needed!)
+- **Aurora PostgreSQL Live connection** for instant Tableau refresh (no extract refresh needed!)
 - **Window messaging** (`postMessage`) for voice popup → main dashboard communication
 - **Status synchronization** across two browser windows
 - **Structured JSON responses** from Perplexity with schema validation
@@ -220,7 +223,7 @@ Both windows show synchronized status: "Analyzing..." during processing, "Comple
 
 ---
 
-## What's next for Ask the World Anything
+## What's next for What the World Really Thinks
 
 ### 🚀 **Short-term Enhancements**
 - **Historical tracking**: Save analyses over time to see how global opinions shift
@@ -269,7 +272,7 @@ While voice input exists in Tableau, **this depth of integration—ElevenLabs + 
 - **Perplexity API**: Complex, structured cultural analysis across 52 countries
 - **ElevenLabs Voice Agents**: Custom webhook with 3-parameter LLM extraction
 - **Tableau Extensions API**: Auto-refresh, status sync, Live connection
-- **MySQL**: Real-time data pipeline with instant propagation
+- **Amazon Aurora PostgreSQL**: Real-time data pipeline with instant propagation, designed to scale
 - **Vercel Serverless**: 60-second timeout handling for long-running AI
 
 ### 🔧 **Solved "Impossible" Problems**
@@ -334,7 +337,25 @@ But this project combines technologies **never integrated together before**:
 ✅ **Globally aware** (52 countries, cultural context)
 ✅ **Conversational** (Talk to your data like a person)
 
-While others are experimenting with voice input, **Ask the World Anything** proves that the next generation of analytics isn't just voice-enabled—it's **truly conversational**, **deeply intelligent**, and **seamlessly integrated**.
+While others are experimenting with voice input, **What the World Really Thinks** proves that the next generation of analytics isn't just voice-enabled—it's **truly conversational**, **deeply intelligent**, and **seamlessly integrated**.
+
+---
+
+## 🗄️ AWS Database: Amazon Aurora PostgreSQL (the scalable backbone)
+
+This project runs on the **H0 "Zero Stack"**: a front-end shipped in minutes on **Vercel**, and a back-end **designed for scale** on **Amazon Aurora PostgreSQL (Serverless v2)**.
+
+**Why Aurora PostgreSQL:**
+- **Designed for scale** — Serverless v2 auto-scales compute (0.5–2+ ACUs) with demand. Today it serves one Tableau dashboard; the same cluster scales to millions of "global perspective" queries without re-architecture.
+- **Live, zero-latency analytics** — Tableau connects to Aurora over a native PostgreSQL **Live** connection, so a voice-triggered analysis appears on the dashboard the instant it's written. No extracts, no refresh jobs.
+- **Managed & durable** — automated backups, multi-AZ subnet group, and TLS-encrypted connections, with zero database servers to manage.
+
+**Data model — `world_perspectives_sample` (wide format, 1 row per country):**
+`AnalysisID, Timestamp, Question, Country, CountryCode, Stance, StanceScore, AgreePercent, MixedPercent, DisagreePercent, Explanation, CulturalFactor1–3, Latitude, Longitude, Region`.
+
+**Write path:** the Vercel serverless function (`/api/voice-analyze`) runs the Perplexity analysis, then `server/utils/pgWriter.js` opens a transaction, clears the previous analysis, and bulk-inserts the new rows — all over a pooled, TLS-secured `pg` connection to Aurora.
+
+**Architecture:** `Voice → ElevenLabs → Vercel function → Perplexity → Amazon Aurora PostgreSQL → Tableau (Live)`.
 
 ---
 
@@ -343,7 +364,7 @@ While others are experimenting with voice input, **Ask the World Anything** prov
 **Backend:**
 - Node.js / Express.js
 - Vercel Serverless Functions (60s timeout)
-- MySQL Database (Live connection)
+- Amazon Aurora PostgreSQL — Serverless v2 (Live connection)
 - Perplexity API (Sonar model)
 - ElevenLabs Webhook Integration
 
@@ -357,7 +378,7 @@ While others are experimenting with voice input, **Ask the World Anything** prov
 - Perplexity Sonar API
 - ElevenLabs Voice Agents
 - Tableau Extensions API
-- MySQL (Live connection)
+- Amazon Aurora PostgreSQL (Live connection)
 - Vercel Deployment
 
 ---
@@ -367,7 +388,7 @@ While others are experimenting with voice input, **Ask the World Anything** prov
 ### Prerequisites
 - Perplexity API key
 - ElevenLabs account with Voice Agent
-- MySQL database (e.g., FreeSQLDatabase)
+- Amazon Aurora PostgreSQL cluster (Serverless v2)
 - Vercel account
 
 ### Installation
@@ -379,11 +400,11 @@ npm install
 Add these to Vercel using `printf "value" | vercel env add`:
 ```env
 PERPLEXITY_API_KEY=your_key_here
-MYSQL_HOST=your_host
-MYSQL_PORT=3306
-MYSQL_USER=your_user
-MYSQL_PASSWORD=your_password
-MYSQL_DATABASE=your_database
+PGHOST=your-cluster.cluster-xxxx.us-west-2.rds.amazonaws.com
+PGPORT=5432
+PGUSER=dbadmin
+PGPASSWORD=your_password
+PGDATABASE=worldthinks
 ```
 
 ### Deploy to Vercel
@@ -409,17 +430,18 @@ See `elevenlabs-tool-setup-instructions.md` for detailed configuration steps.
 
 ### Tableau Setup
 
-#### Step 1: Connect to MySQL Database
+#### Step 1: Connect to Amazon Aurora PostgreSQL
 1. Open Tableau Desktop or Tableau Cloud
-2. Connect to Data → **MySQL**
-3. Enter your database credentials:
-   - Server: `your-mysql-host`
-   - Port: `3306`
-   - Database: `your-database-name`
-   - Username: `your-username`
+2. Connect to Data → **PostgreSQL**
+3. Enter your Aurora cluster credentials:
+   - Server: `your-cluster.cluster-xxxx.us-west-2.rds.amazonaws.com`
+   - Port: `5432`
+   - Database: `worldthinks`
+   - Username: `dbadmin`
    - Password: `your-password`
+   - Require SSL: **Yes**
 4. **IMPORTANT**: Choose **Live** connection (NOT Extract!)
-5. Select the `world_perspectives` table
+5. Select the `world_perspectives_sample` table
 
 #### Step 2: Authorize Vercel Server in Tableau
 Before adding the extension, you must authorize your Vercel URLs:
@@ -516,27 +538,47 @@ Get all available countries
 ## Project Structure
 
 ```
-ask-the-world-anything/
+what-the-world-really-thinks/
 ├── server/
-│   ├── server.js                  # Main Express server + voice webhook
+│   ├── server.js                  # Main Express app + voice webhook (/api/voice-analyze)
 │   ├── routes/
 │   │   ├── analyze.js             # POST /api/analyze
 │   │   └── countries.js           # GET /api/countries
 │   ├── services/
-│   │   ├── perplexity.js          # Perplexity API integration
-│   │   ├── dataTransform.js       # Tableau data formatting
-│   │   └── geoData.js             # Country coordinates
+│   │   ├── perplexity.js          # Perplexity (Sonar) API integration
+│   │   ├── dataTransform.js       # Tableau/wide-format data shaping
+│   │   └── geoData.js             # Country coordinates + lookups
 │   └── utils/
-│       └── mysqlWriter.js         # MySQL database writer
+│       └── pgWriter.js            # Amazon Aurora PostgreSQL writer (pg)
+├── api/
+│   └── index.js                   # Vercel serverless entry (wraps the Express app)
 ├── extension/
 │   ├── manifest.trex              # Tableau extension manifest
 │   ├── index.html                 # Main extension UI
 │   └── voice.html                 # Voice agent popup
-├── api/
-│   └── voice-analyze.js           # Vercel serverless function
+├── tests/                         # node:test unit suite (npm test)
+│   ├── pgWriter.test.js           # Aurora INSERT builder
+│   ├── dataTransform.test.js      # Perplexity → Tableau transform
+│   └── geoData.test.js            # Country lookups
+├── architecture-diagram.png       # H0 architecture diagram
+├── DEVPOST_SUBMISSION.md          # Devpost write-up
 ├── elevenlabs-webhook-config.json # ElevenLabs tool configuration
 ├── vercel.json                    # 60s timeout config
 └── README.md
+```
+
+## Architecture
+
+![Architecture](architecture-diagram.png)
+
+`Voice → ElevenLabs → Vercel serverless function → Perplexity (Sonar) → Amazon Aurora PostgreSQL → Tableau (Live)`
+
+## Tests
+
+A zero-dependency unit suite (Node's built-in `node:test`) covers the Aurora `INSERT` builder, the Perplexity→Tableau transform, and the country lookups:
+
+```bash
+npm test
 ```
 
 ---
@@ -556,8 +598,8 @@ In Tableau Settings → Extensions tab, you must:
 
 Example URLs to whitelist:
 ```
-https://ask-the-world-anything-cch87wd94-eimis-projects.vercel.app
-https://ask-the-world-anything-cch87wd94-eimis-projects.vercel.app/index.html
+https://what-the-world-really-thinks.vercel.app
+https://what-the-world-really-thinks.vercel.app/index.html
 ```
 
 ### Voice Interface
@@ -591,10 +633,12 @@ When voice analysis runs, the main dashboard shows:
 - Verify voice popup is polling every 2 seconds
 - Check main window message listener is registered
 
-### MySQL connection fails
+### Aurora PostgreSQL connection fails
 - Use `printf` not `echo` when adding env vars
 - Check for trailing newlines in environment variables
 - Verify database credentials
+- Confirm the cluster security group allows inbound TCP 5432 from your client/Vercel
+- Ensure the connection uses SSL (Aurora requires TLS)
 
 ---
 
@@ -606,6 +650,7 @@ MIT License - feel free to use for any purpose!
 
 ## Acknowledgments
 
+- **Amazon Aurora PostgreSQL** for the scalable, Live-connected data backbone
 - **Perplexity AI** for the cultural analysis engine
 - **ElevenLabs** for voice AI capabilities
 - **Tableau Cloud** for the visualization platform
@@ -615,4 +660,4 @@ MIT License - feel free to use for any purpose!
 
 **Made with ❤️ for global understanding through conversational analytics**
 
-*Ask the World Anything - Where Voice Meets Visual Intelligence*
+*What the World Really Thinks - Where Voice Meets Visual Intelligence*

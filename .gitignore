@@ -10,3 +10,10 @@ dist/
 *.swo
 google-credentials.json
 .vercel
+
+# AWS credentials (never commit)
+*accessKeys*.csv
+*.pem
+
+# Local agent/session data (never commit)
+.claude/

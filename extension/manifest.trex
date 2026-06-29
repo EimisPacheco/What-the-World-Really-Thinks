@@ -3,19 +3,19 @@
   <dashboard-extension id="com.asktheworld.extension" extension-version="1.0.0">
 
     <default-locale>en_US</default-locale>
-    <name>Ask the World Anything</name>
+    <name>What the World Really Thinks</name>
     <description>Analyze global perspectives on any claim or question using AI-powered insights</description>
 
     <author
       name="Eimis Pacheco"
       email="eimis.j.pacheco.a@gmail.com"
       organization="Eimis' projects"
-      website="https://ask-the-world-anything-nine.vercel.app" />
+      website="https://what-the-world-really-thinks.vercel.app" />
 
     <min-api-version>1.0</min-api-version>
 
     <source-location>
-      <url>https://ask-the-world-anything-nine.vercel.app/index.html</url>
+      <url>https://what-the-world-really-thinks.vercel.app/index.html</url>
     </source-location>
 
     <icon>iVBORw0KGgoAAAANSUhEUgAAAEYAAABGCAYAAABxLuKEAAAACXBIWXMAAAsTAAALEwEAmpwYAAADTklEQVR4nO2cy27TQBSG/yRNk6YpLaVcCqWl3BELxIIVG3gAeAAegR0SG1asWLFjw44dT8CCHQuQuykSFwECCZVCuZRbSUiaNM7MiDGKiRPbiWfGmfNJo0ht5fjP+H7m2DEhCIIgCIIgCIIgCIIgCIIgCIIgCIIgCIL4G0mhK+AHMm1gFKRiBCGzBsRMG+AzbYDLjIF+kwZ6TRnoNWVAyKQBsqFmTAQ1BaJmDHCZNsDZ6tP1NtRm2gBvywCXaQOdpgz0mDLQbcoAl0kDfMYM8A03I2ZMB+cyaYDPtAFhswb6TRvoNmWgy5SBTpMGBk0a4DNpgMukAT6TBvhMGuAzbkDMuAE+kwYETRsQNmVAyJQBIZMGBEwZEDBtQMikASGTBkTMGBAxY0DMlAERUwaETRoQMm1AwKQBYZMGBE0aEDBpQNCkASGTBkTMGBAxY0DUtAFR0wZETRsQM21AzJQBUdMGhE0bEDRtQMy0AQFTBgRNGxA0bUDApAEBEwaETBgQNGGAz7gBQeMGuIwZ4DNpgLPVh89Wn663oTZjBjhb/f9s9Rds9Rds9QkbNyBsywCXMQM8xg1wmTDAZcxAlykDfMYMcJkywGXSAK9pAzzGDfCZNMBt3AC3KQPipg3wmDTAY9yAqGkDoqYN8Jo2wGPcAI8pA6KmDIiaMsBr2gCvaQO8pg3wmjLAa8oAj0kD3MYNC5o2wGPaAI9pAzwmDPCaMCBiwgCPCQM8xg0ImTQgYtKAsAkDwiYM8JgwwGPCAJ8JAzzGDQiZNMBn0gCfSQN8Jg0ImTTAZ9IAr0kDPCYN8Jg0wGfSAJ8JA3zGDfAaN8Bn3ACfcQO8xg0ImTAgZMKAoAkDfMYN8Bo3wGvKAJ9JA3ymDPCZMsBn0gCfSQN8xg3wmjDAZ9oAr2kD/KYN8Js2wG/aAL9pA3zGDfCbNsBv2gC/aQP8pg3wmzTAb9oAr3EDgiYMCJowwG/cAJ9xA/zGDfAaN8Bn3ACvSQO8Jg3wmjQgYNKAgAkD/MYN8JswwG/CAK8JA7wmDfCZNMBn0gCfCQP8xg3wmzDAb8IAr0kDvCYN8Jk0wGfSAJ9JA3wmDfAaN8Bv3ACvSQN8Jg3wmTTAZ9IAn0kDvCYN8Jo0wGvKAK9JA3wmDfCZNMBr0gCfSQN8Jg3wmjTAa9IAn0kDvCYN8Jk0wGvSAJ9JA0ImDQiZNIAgCIIgCIIgCIIgCIIgCIIgCIIgCIIgCIJwBr8BGjAGez5JK9cAAAAASUVORK5CYII=</icon>

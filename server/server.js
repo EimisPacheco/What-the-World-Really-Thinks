@@ -5,7 +5,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import analyzeRouter from './routes/analyze.js';
 import countriesRouter from './routes/countries.js';
-import { testConnection, writeToMySQL } from './utils/mysqlWriter.js';
+import { testConnection, writeToPostgres } from './utils/pgWriter.js';
 import { analyzeQuestion } from './services/perplexity.js';
 import { getAllCountries } from './services/geoData.js';
 
@@ -17,7 +17,7 @@ const PORT = process.env.PORT || 3000;
 const isVercel = !!process.env.VERCEL;
 
 // Global validation state
-let validation = { allValid: false, mysqlConfigured: false };
+let validation = { allValid: false, databaseConfigured: false };
 
 // Track last analysis for voice agent polling
 let lastAnalysis = {
@@ -71,34 +71,34 @@ async function validateEnvironment() {
     'Perplexity API': {
       PERPLEXITY_API_KEY: process.env.PERPLEXITY_API_KEY
     },
-    'MySQL Database': {
-      MYSQL_HOST: process.env.MYSQL_HOST,
-      MYSQL_PORT: process.env.MYSQL_PORT,
-      MYSQL_USER: process.env.MYSQL_USER,
-      MYSQL_PASSWORD: process.env.MYSQL_PASSWORD,
-      MYSQL_DATABASE: process.env.MYSQL_DATABASE
+    'Aurora PostgreSQL Database': {
+      PGHOST: process.env.PGHOST,
+      PGPORT: process.env.PGPORT,
+      PGUSER: process.env.PGUSER,
+      PGPASSWORD: process.env.PGPASSWORD,
+      PGDATABASE: process.env.PGDATABASE
     }
   };
 
   let allValid = true;
-  let mysqlConfigured = true;
+  let databaseConfigured = true;
 
   for (const [category, vars] of Object.entries(requiredVars)) {
     console.log(`📦 ${category}:`);
-    
+
     for (const [key, value] of Object.entries(vars)) {
       if (value === undefined || value === null || value === '') {
         console.log(`   ❌ ${key}: MISSING`);
         allValid = false;
-        if (category === 'MySQL Database') {
-          mysqlConfigured = false;
+        if (category === 'Aurora PostgreSQL Database') {
+          databaseConfigured = false;
         }
       } else {
         // Show redacted value for security
         let displayValue = value;
-        
+
         // Redact sensitive values
-        if (key === 'MYSQL_PASSWORD') {
+        if (key === 'PGPASSWORD') {
           if (value.length > 8) {
             displayValue = value.substring(0, 3) + '***' + value.substring(value.length - 2);
           } else {
@@ -118,45 +118,45 @@ async function validateEnvironment() {
     console.log('');
   }
 
-  // MySQL connection test
+  // Aurora PostgreSQL connection test
   console.log('========================================');
-  console.log('🗄️  MYSQL CONNECTION TEST');
+  console.log('🗄️  AURORA POSTGRESQL CONNECTION TEST');
   console.log('========================================\n');
 
-  if (mysqlConfigured) {
+  if (databaseConfigured) {
     try {
       await testConnection();
-      console.log('✅ MySQL is READY');
+      console.log('✅ Aurora PostgreSQL is READY');
       console.log('   Tableau can connect with Live mode for instant refresh!');
       console.log('');
-      console.log(`   Host: ${process.env.MYSQL_HOST}`);
-      console.log(`   Database: ${process.env.MYSQL_DATABASE}`);
-      console.log(`   User: ${process.env.MYSQL_USER}`);
+      console.log(`   Host: ${process.env.PGHOST}`);
+      console.log(`   Database: ${process.env.PGDATABASE}`);
+      console.log(`   User: ${process.env.PGUSER}`);
     } catch (error) {
-      console.log('❌ MySQL connection FAILED');
+      console.log('❌ Aurora PostgreSQL connection FAILED');
       console.log(`   Error: ${error.message}`);
       console.log('');
       console.log('   Please check:');
       console.log('   1. Database credentials in .env');
-      console.log('   2. Network connectivity');
-      console.log('   3. Database server is running');
-      mysqlConfigured = false;
+      console.log('   2. Network connectivity / security group (port 5432)');
+      console.log('   3. Aurora cluster is available');
+      databaseConfigured = false;
     }
   } else {
-    console.log('❌ MySQL is NOT CONFIGURED');
+    console.log('❌ Aurora PostgreSQL is NOT CONFIGURED');
     console.log('   Missing required environment variables');
     console.log('');
     console.log('   Required variables:');
-    console.log('   - MYSQL_HOST:', process.env.MYSQL_HOST ? '✅ SET' : '❌ MISSING');
-    console.log('   - MYSQL_PORT:', process.env.MYSQL_PORT ? '✅ SET' : '❌ MISSING');
-    console.log('   - MYSQL_USER:', process.env.MYSQL_USER ? '✅ SET' : '❌ MISSING');
-    console.log('   - MYSQL_PASSWORD:', process.env.MYSQL_PASSWORD ? '✅ SET' : '❌ MISSING');
-    console.log('   - MYSQL_DATABASE:', process.env.MYSQL_DATABASE ? '✅ SET' : '❌ MISSING');
+    console.log('   - PGHOST:', process.env.PGHOST ? '✅ SET' : '❌ MISSING');
+    console.log('   - PGPORT:', process.env.PGPORT ? '✅ SET' : '❌ MISSING');
+    console.log('   - PGUSER:', process.env.PGUSER ? '✅ SET' : '❌ MISSING');
+    console.log('   - PGPASSWORD:', process.env.PGPASSWORD ? '✅ SET' : '❌ MISSING');
+    console.log('   - PGDATABASE:', process.env.PGDATABASE ? '✅ SET' : '❌ MISSING');
   }
 
   console.log('\n========================================\n');
 
-  return { allValid, mysqlConfigured };
+  return { allValid, databaseConfigured };
 }
 
 // Middleware
@@ -309,20 +309,20 @@ app.post('/api/voice-analyze', async (req, res) => {
     console.log('   Updated lastAnalysis timestamp:', lastAnalysis.timestamp);
     console.log('   Status: COMPLETE (voice agent will show success)');
 
-    // Automatically write to MySQL database for Tableau
-    console.log('\n💾 CALLING writeToMySQL()...');
-    console.log('   Function: writeToMySQL(tableauData, summaryData)');
+    // Automatically write to Aurora PostgreSQL for Tableau
+    console.log('\n💾 CALLING writeToPostgres()...');
+    console.log('   Function: writeToPostgres(tableauData, summaryData)');
     console.log('   Tableau rows to write:', result.tableauData.countryData.length);
 
     try {
-      await writeToMySQL(result.tableauData, result.data);
-      console.log('✅ writeToMySQL() COMPLETED');
-      console.log('   MySQL database updated successfully');
+      await writeToPostgres(result.tableauData, result.data);
+      console.log('✅ writeToPostgres() COMPLETED');
+      console.log('   Aurora PostgreSQL updated successfully');
       console.log('   Tableau Live connection can now see new data!');
-    } catch (mysqlError) {
-      console.error('❌ writeToMySQL() FAILED');
-      console.error('   Error:', mysqlError.message);
-      console.error('   Stack:', mysqlError.stack);
+    } catch (dbError) {
+      console.error('❌ writeToPostgres() FAILED');
+      console.error('   Error:', dbError.message);
+      console.error('   Stack:', dbError.stack);
     }
 
     console.log('\n📤 SENDING RESPONSE TO CLIENT');
@@ -398,10 +398,10 @@ app.get('/api/last-analysis', (req, res) => {
 
 // Health check
 app.get('/health', (req, res) => {
-  res.json({ 
-    ok: true, 
-    message: 'Ask the World Anything API running',
-    mysqlConfigured: validation.mysqlConfigured,
+  res.json({
+    ok: true,
+    message: 'What the World Really Thinks API running',
+    databaseConfigured: validation.databaseConfigured,
     environmentValid: validation.allValid
   });
 });
@@ -410,13 +410,13 @@ app.get('/health', (req, res) => {
 app.get('/api/status', (req, res) => {
   const status = {
     server: 'running',
-    database: validation.mysqlConfigured ? 'MySQL (Live)' : 'Not configured',
+    database: validation.databaseConfigured ? 'Aurora PostgreSQL (Live)' : 'Not configured',
     perplexityApi: !!process.env.PERPLEXITY_API_KEY,
     config: {
-      mysqlHost: process.env.MYSQL_HOST || 'NOT SET',
-      mysqlDatabase: process.env.MYSQL_DATABASE || 'NOT SET',
-      mysqlUser: process.env.MYSQL_USER || 'NOT SET',
-      mysqlPasswordPresent: !!process.env.MYSQL_PASSWORD
+      pgHost: process.env.PGHOST || 'NOT SET',
+      pgDatabase: process.env.PGDATABASE || 'NOT SET',
+      pgUser: process.env.PGUSER || 'NOT SET',
+      pgPasswordPresent: !!process.env.PGPASSWORD
     }
   };
   
@@ -439,7 +439,7 @@ const ready = (async () => {
   if (!isVercel) {
     app.listen(PORT, () => {
       console.log('========================================');
-      console.log('🌍 ASK THE WORLD ANYTHING - SERVER READY');
+      console.log('🌍 WHAT THE WORLD REALLY THINKS - SERVER READY');
       console.log('========================================\n');
       console.log(`🚀 Server running on http://localhost:${PORT}`);
       console.log(`📊 Tableau Extension: http://localhost:${PORT}/`);
@@ -448,13 +448,13 @@ const ready = (async () => {
       console.log(`🗣️  Voice API: http://localhost:${PORT}/api/voice-analyze`);
       console.log('\n========================================\n');
       
-      if (!validation.mysqlConfigured) {
-        console.log('⚠️  WARNING: MySQL not configured');
+      if (!validation.databaseConfigured) {
+        console.log('⚠️  WARNING: Aurora PostgreSQL not configured');
         console.log('   Dashboard will NOT update!');
         console.log('   Check your .env file and restart the server.\n');
       } else {
         console.log('✅ All systems ready!');
-        console.log('   MySQL: Connected');
+        console.log('   Aurora PostgreSQL: Connected');
         console.log('   Tableau: Use Live connection for instant refresh');
         console.log('   Voice: Ready for ElevenLabs integration\n');
       }

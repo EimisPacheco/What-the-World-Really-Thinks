@@ -9,7 +9,7 @@
   "tool_call_sound_behavior": "auto",
   "execution_mode": "immediate",
   "api_schema": {
-    "url": "https://ask-the-world-anything-nine.vercel.app/api/voice-analyze",
+    "url": "https://what-the-world-really-thinks.vercel.app/api/voice-analyze",
     "method": "POST",
     "path_params_schema": [],
     "query_params_schema": [],

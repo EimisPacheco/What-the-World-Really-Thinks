@@ -1,6 +1,6 @@
 import express from 'express';
 import { analyzeQuestion } from '../services/perplexity.js';
-import { writeToMySQL } from '../utils/mysqlWriter.js';
+import { writeToPostgres } from '../utils/pgWriter.js';
 
 const router = express.Router();
 
@@ -26,16 +26,16 @@ router.post('/', async (req, res) => {
     // SYNCHRONOUS: Wait for analysis to complete
     const result = await analyzeQuestion(analysisId, question, countries);
 
-    // Automatically write to MySQL database for Tableau
+    // Automatically write to Aurora PostgreSQL for Tableau
     try {
-      await writeToMySQL(result.tableauData, result.data);
-      console.log('✅ MySQL database updated - Tableau can now see new data!');
+      await writeToPostgres(result.tableauData, result.data);
+      console.log('✅ Aurora PostgreSQL updated - Tableau can now see new data!');
       console.log('');
       console.log('🎯 For LIVE connection: Tableau updates automatically');
       console.log('   Just call refreshAsync() in the extension');
       console.log('');
-    } catch (mysqlError) {
-      console.error('⚠️  MySQL write failed:', mysqlError.message);
+    } catch (dbError) {
+      console.error('⚠️  Aurora PostgreSQL write failed:', dbError.message);
     }
 
     // Return complete result

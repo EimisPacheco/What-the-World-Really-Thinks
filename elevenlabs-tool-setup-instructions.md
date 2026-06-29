@@ -10,7 +10,7 @@ Instead of pasting JSON, configure the tool step-by-step in the ElevenLabs dashb
 - **Description**: "Analyzes global perspectives on any question or statement. Use this when the user asks to analyze something or wants to know what the world thinks about a topic."
 
 ### 2. API Configuration
-- **URL**: `https://ask-the-world-anything-nine.vercel.app/api/voice-analyze`
+- **URL**: `https://what-the-world-really-thinks.vercel.app/api/voice-analyze`
 - **Method**: `POST`
 - **Timeout**: `60` seconds (CRITICAL - must be 60, not 20!)
 
@@ -75,7 +75,7 @@ If ElevenLabs requires JSON import, try this MINIMAL version:
 {
   "name": "analyze_question",
   "description": "Analyzes global perspectives on any question",
-  "url": "https://ask-the-world-anything-nine.vercel.app/api/voice-analyze",
+  "url": "https://what-the-world-really-thinks.vercel.app/api/voice-analyze",
   "method": "POST",
   "timeout": 60,
   "headers": {

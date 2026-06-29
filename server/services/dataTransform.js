@@ -202,7 +202,7 @@ export function formatForWDC(tableauData) {
   return {
     schema: {
       id: "askTheWorldData",
-      alias: "Ask the World Anything - Analysis Data",
+      alias: "What the World Really Thinks - Analysis Data",
       columns: [
         { id: "AnalysisID", dataType: "string" },
         { id: "Timestamp", dataType: "datetime" },
