@@ -3,6 +3,17 @@
 > **H0 Hackathon submission** — *Hack the Zero Stack with Vercel v0 and AWS Databases.*
 > Front-end shipped on **Vercel**; back-end powered by **Amazon Aurora PostgreSQL (Serverless v2)** feeding a live Tableau dashboard.
 
+**🌐 Live app:** https://what-the-world-really-thinks.vercel.app  ·  **🗄️ AWS Database:** Amazon Aurora PostgreSQL (Serverless v2)  ·  **📐 [Architecture](architecture-diagram.png)**  ·  **📝 [Devpost write-up](DEVPOST_SUBMISSION.md)**
+
+### Try it in 30 seconds (no setup)
+Trigger a live analysis — this runs Vercel serverless → Perplexity → **Amazon Aurora PostgreSQL**, and returns the same data the Tableau map renders:
+
+```bash
+curl -X POST https://what-the-world-really-thinks.vercel.app/api/analyze \
+  -H "Content-Type: application/json" \
+  -d '{"question":"Coffee is better than tea","countries":["US","CA","JP"]}'
+```
+
 ## Have you ever talked to your Tableau dashboard?
 
 Most people haven't. Voice-enabled Tableau extensions are **extremely rare**—only a handful exist worldwide.
